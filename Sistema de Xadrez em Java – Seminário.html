@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sistema de Xadrez em Java – Seminário</title>
+<style>
+:root{--bg:#f5f4f2;--card:#fff;--ink:#161513;--mut:#6b6560;--red:#c74634;--hd:#312d2a;--line:#dcd8d4;--code:#1f1c1a;--l:#ece6dc;--d:#b9a98f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1a19;--card:#26231f;--ink:#f1efed;--mut:#a8a29c;--line:#3a3632;--l:#4a443d;--d:#2f2b27}}
+:root[data-theme="dark"]{--bg:#1c1a19;--card:#26231f;--ink:#f1efed;--mut:#a8a29c;--line:#3a3632;--l:#4a443d;--d:#2f2b27}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px;height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--hd);color:#fff;border-bottom:4px solid var(--red);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:8px 20px;gap:10px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;color:#fff;font-size:20px}.logo svg{width:34px;height:34px}
+header h1{margin:0;font-size:clamp(14px,2.2vw,22px);font-weight:500;text-align:center}
+.hr{justify-self:end;display:flex;gap:8px}
+.hr button{background:none;border:1px solid #8a817a;color:#fff;border-radius:4px;padding:6px 12px;cursor:pointer;font:600 13px inherit;letter-spacing:.08em}
+.hr button:hover{background:var(--red);border-color:var(--red)}
+#bar{position:fixed;top:0;left:0;height:3px;background:#ffb4a6;width:0;z-index:30}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 250px;max-width:1280px;margin:auto}
+main{padding:30px 28px 60px;min-width:0}
+aside{position:sticky;top:76px;align-self:start;height:calc(100vh - 80px);border-left:1px solid var(--line);padding:24px 0}
+aside b{display:block;padding:0 20px 8px;font-size:12px;letter-spacing:.12em;color:var(--mut)}
+aside a{display:block;padding:9px 20px;color:var(--ink);text-decoration:none;border-left:4px solid transparent;margin-left:-1px;transition:.2s}
+aside a:hover{background:rgba(199,70,52,.1)}aside a.on{border-color:var(--red);font-weight:700;color:var(--red)}
+section{margin-bottom:64px;opacity:0;transform:translateY(24px);transition:.7s}section.in{opacity:1;transform:none}
+h2{font-size:28px;margin:0 0 6px;font-weight:400}h2 small{color:var(--red);font-size:14px;letter-spacing:.1em;display:block}
+h2:after{content:"";display:block;width:60px;height:3px;background:var(--red);margin-top:8px}
+.hero{background:linear-gradient(120deg,var(--hd),#4a2a24 60%,var(--red));color:#fff;border-radius:6px;padding:44px 32px;position:relative;overflow:hidden}
+.hero h2{font-size:clamp(28px,5vw,46px);font-weight:300;color:#fff}.hero h2:after{background:#fff}
+.hero p{max-width:640px;opacity:.92}.hero:before{content:"♞";position:absolute;right:20px;top:-30px;font-size:230px;opacity:.1}
+.badge{display:inline-block;background:#fff;color:var(--red);font-weight:700;padding:6px 14px;border-radius:30px;font-size:13px;margin:6px 0;animation:pulse 2.4s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,255,255,.22)}}
+.btn{display:inline-block;margin:10px 8px 0 0;padding:10px 20px;background:var(--red);color:#fff;text-decoration:none;border:2px solid #fff;border-radius:4px;font-weight:600}.btn.o{background:none}.btn:hover{filter:brightness(1.15)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:22px}
+.stats div{background:rgba(255,255,255,.14);padding:12px;border-radius:4px;text-align:center}.stats b{font-size:28px;display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px;margin:14px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.chip{display:inline-block;margin:4px;padding:5px 12px;border:1px solid var(--red);color:var(--red);background:none;border-radius:20px;cursor:pointer;font:600 13px monospace;transition:.2s}
+.chip:hover,.chip.on{background:var(--red);color:#fff}
+#info{min-height:56px;border-left:4px solid var(--red);padding:10px 14px;background:rgba(199,70,52,.08);margin-top:10px}
+pre{background:var(--code);color:#e8e2da;padding:14px;border-radius:5px;overflow-x:auto;font:13px/1.55 Consolas,monospace;margin:10px 0;max-width:100%}
+pre i{color:#f08d7e;font-style:normal}
+.two{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
+.board{display:grid;grid-template-columns:repeat(8,1fr);width:min(100%,400px);aspect-ratio:1;border:3px solid var(--hd)}
+.sq{display:flex;align-items:center;justify-content:center;font:700 clamp(14px,3.4vw,26px) Consolas,monospace;cursor:pointer;user-select:none;transition:background .15s}
+.sq.l{background:var(--l)}.sq.d{background:var(--d)}.sq.w{color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}.sq.y{color:#b7791f}
+.sq.hl{background:#3b82f6!important;color:#fff}.sq.sel{outline:3px solid var(--red);outline-offset:-3px}.sq.pop{animation:pop .4s}
+@keyframes pop{from{transform:scale(2);opacity:0}}
+.mat{font:12px/1.5 Consolas,monospace;background:var(--code);color:#7d766f;padding:10px;border-radius:5px;white-space:pre}.mat u{color:#6cb6ff;text-decoration:none;font-weight:700}
+#log{height:120px;overflow:auto;font-size:12px}
+.steps{display:flex;flex-wrap:wrap;gap:6px}.steps button{width:34px;height:34px;border-radius:50%;border:2px solid var(--red);background:none;color:var(--ink);cursor:pointer;font-weight:700}
+.steps button.on{background:var(--red);color:#fff}
+.tabs button{padding:8px 16px;border:0;border-bottom:3px solid transparent;background:none;color:var(--ink);cursor:pointer;font:600 15px inherit}.tabs button.on{border-color:var(--red);color:var(--red)}
+.act{margin:8px 8px 0 0;padding:8px 16px;border:0;background:var(--hd);color:#fff;border-radius:4px;cursor:pointer;font-weight:600}.act:hover{background:var(--red)}
+ul.ck{list-style:none;padding:0}ul.ck li:before{content:"✔ ";color:var(--red);font-weight:700}
+footer{background:var(--hd);color:#cfc8c1;text-align:center;padding:26px;border-top:4px solid var(--red)}footer a{color:#ffb4a6}
+@media(max-width:860px){.wrap{display:block}aside{position:fixed;right:0;top:0;bottom:0;width:250px;height:auto;background:var(--card);z-index:40;transform:translateX(100%);transition:.3s;padding-top:70px;box-shadow:-4px 0 20px #0005}aside.open{transform:none}.two{grid-template-columns:1fr}header{grid-template-columns:auto 1fr auto}main{padding:20px 14px}}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<header>
+<div class="logo"><svg viewBox="0 0 40 40"><path d="M8 20h20v6a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8z" fill="#fff"/><path d="M28 22h3a3 3 0 0 1 0 8h-4" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M14 8c-3 3 3 4 0 8M21 5c-3 3 3 4 0 8" stroke="#e8604c" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>Java</div>
+<h1>Sistema de Xadrez em Java</h1>
+<div class="hr"><button id="th" title="Tema">◐</button><h1 id="mn"></h1></div>
+</header>
+<div class="wrap">
+<main>
+<section id="inicio" class="hero in">
+<h2>Sistema de Xadrez<br>em Java puro</h2>
+<span class="badge">🛠 100% feito à mão</span>
+<p>Um jogo de xadrez completo no console: movimentos de todas as peças, xeque, xeque-mate, roque, en passant e promoção. Sem bibliotecas externas, sem game engines, sem frameworks: apenas as classes essenciais que já vêm no Java.</p>
+<p><b>Autor:</b> Carlos G. Matuda</p>
+<a class="btn" href="https://github.com/carlosgmatuda-rgb" target="_blank" rel="noopener">GitHub ↗</a><a class="btn o" href="#arquitetura">Começar o seminário ↓</a>
+<div class="stats"><div><b data-n="19">0</b>arquivos .java</div><div><b data-n="3">0</b>pacotes</div><div><b data-n="6">0</b>tipos de peça</div><div><b data-n="0">0</b>bibliotecas externas</div></div>
+</section>
+
+<section id="arquitetura">
+<h2><small>01</small>Arquitetura em camadas</h2>
+<p>O projeto separa o que é <b>qualquer jogo de tabuleiro</b> do que é <b>regra de xadrez</b>. Clique nas classes:</p>
+<div class="grid">
+<div class="card"><b>📦 boardgame</b><br><small>camada genérica</small><br><span id="c1"></span></div>
+<div class="card"><b>♟ chess (+ chess.pieces)</b><br><small>regras do xadrez</small><br><span id="c2"></span></div>
+<div class="card"><b>🖥 application</b><br><small>interface de console</small><br><span id="c3"></span></div>
+</div>
+<div id="info">Escolha uma classe para ver o que ela faz.</div>
+</section>
+
+<section id="init">
+<h2><small>02</small>Instanciação e inicialização</h2>
+<p>Ao fazer <code>new ChessMatch()</code>, o construtor cria um <code>Board(8, 8)</code>, define turno 1, jogador WHITE e chama <code>initialSetup()</code>. Cada peça é criada com <code>new</code> e posicionada por <code>placeNewPiece</code>, que usa <code>ChessPosition</code> (ex.: a1) convertido para a matriz.</p>
+<pre>private void placeNewPiece(char column, int row, ChessPiece piece) {
+    board.placePiece(new ChessPosition(column, row).toPosition(), piece);
+    pieceOnTheBoard.add(piece);
+}
+<i>// toPosition(): new Position(8 - row, column - 'a')</i></pre>
+<div class="two"><div class="board" id="b2"></div><div><button class="act" id="run">▶ Executar initialSetup()</button><button class="act" id="clr">Limpar</button><div class="mat" id="log">// aguardando...</div></div></div>
+</section>
+
+<section id="moves">
+<h2><small>03</small>possibleMoves(): a matriz booleana</h2>
+<p>Cada peça implementa o método abstrato <code>boolean[][] possibleMoves()</code>. Ele devolve uma matriz 8×8 em que <code>true</code> marca as casas de destino (as azuis no console). <b>Clique numa peça</b> e depois numa casa azul para movê-la.</p>
+<div class="two"><div class="board" id="b3"></div><div><div id="sel" class="card">Nenhuma peça selecionada.</div><div class="mat" id="mat"></div><button class="act" id="rst">↺ Reiniciar</button></div></div>
+<p><small>Simulação em JavaScript do mesmo raciocínio das classes Rook, Bishop, Queen, Knight, King e Pawn (sem roque e en passant).</small></p>
+</section>
+
+<section id="fluxo">
+<h2><small>04</small>O caminho de uma jogada</h2>
+<p>Navegue pelas etapas de <code>performChessMove(source, target)</code>:</p>
+<div class="steps" id="st"></div>
+<div class="card"><b id="stt"></b><p id="std"></p><pre id="stc"></pre></div>
+</section>
+
+<section id="especiais">
+<h2><small>05</small>Movimentos especiais</h2>
+<div class="tabs" id="tb"></div>
+<div class="card"><p id="tbd"></p><pre id="tbc"></pre></div>
+</section>
+
+<section id="poo">
+<h2><small>06</small>Conceitos de POO aplicados</h2>
+<div class="grid" id="oop"></div>
+</section>
+
+<section id="manual">
+<h2><small>07</small>Feito à mão, do zero</h2>
+<div class="card"><ul class="ck">
+<li>Nenhuma dependência externa (sem Maven/Gradle, sem JARs)</li>
+<li>Nenhuma game engine nem biblioteca gráfica: o tabuleiro é desenhado no console com códigos ANSI</li>
+<li>Apenas pacotes padrão do JDK: <code>java.util</code>, <code>java.util.stream</code>, <code>java.io</code></li>
+<li>Toda a lógica (matrizes de movimento, xeque, xeque-mate, desfazer jogada) escrita manualmente</li>
+<li>Tratamento de erros com exceções próprias: <code>BoardException</code> e <code>ChessException</code></li></ul></div>
+</section>
+</main>
+<aside id="nav"><b>NESTE SEMINÁRIO</b>
+<a href="#inicio">Início</a><a href="#arquitetura">1. Arquitetura</a><a href="#init">2. Inicialização</a><a href="#moves">3. possibleMoves</a><a href="#fluxo">4. Fluxo da jogada</a><a href="#especiais">5. Especiais</a><a href="#poo">6. POO</a><a href="#manual">7. Feito à mão</a></aside>
+</div>
+<footer>Feito por <b>Carlos G. Matuda</b> · Java puro, sem bibliotecas · <a href="https://github.com/carlosgmatuda-rgb" target="_blank" rel="noopener">github.com/carlosgmatuda-rgb</a></footer>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+/* tema e menu */
+$("#th").onclick=()=>{const r=document.documentElement,d=r.dataset.theme==="dark"||(!r.dataset.theme&&matchMedia("(prefers-color-scheme:dark)").matches);r.dataset.theme=d?"light":"dark"};
+$("#mn").onclick=()=>$("#nav").classList.toggle("open");
+$$("#nav a").forEach(a=>a.onclick=()=>$("#nav").classList.remove("open"));
+/* progresso, revelar, scrollspy */
+addEventListener("scroll",()=>{$("#bar").style.width=100*scrollY/(document.body.scrollHeight-innerHeight)+"%"});
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");$$("#nav a").forEach(a=>a.classList.toggle("on",a.hash==="#"+e.target.id))}}),{threshold:.25});
+$$("section").forEach(s=>io.observe(s));
+/* contadores */
+$$("[data-n]").forEach(el=>{const n=+el.dataset.n;let i=0;const t=setInterval(()=>{el.textContent=i;if(i++>=n)clearInterval(t)},80)});
+/* 01 classes */
+const CL={boardgame:{Board:"Matriz Piece[][] com linhas e colunas. Métodos: piece(), placePiece(), removePiece(), positionExists(), thereIsAPiece().",Piece:"Classe abstrata com position e board. Declara possibleMoves() e implementa possibleMove() e isThereAnyPossibleMove().",Position:"Linha e coluna da matriz, com getters, setters e setValues().",BoardException:"RuntimeException para erros do tabuleiro (posição fora do tabuleiro, casa ocupada)."},chess:{ChessMatch:"O coração do jogo: turno, jogador atual, xeque, xeque-mate, listas de peças, makeMove/undoMove e regras especiais.",ChessPiece:"Estende Piece e adiciona Color e moveCount. Tem isThereOpponentePiece().",ChessPosition:"Posição em notação de xadrez (a1 a h8) com conversão para Position: linha da matriz = 8 - linha do xadrez.",Color:"Enum com BLACK e WHITE.",ChessException:"Estende BoardException para erros de regra (ex.: não pode se colocar em xeque).",King:"Move 1 casa em 8 direções e faz roque.",Queen:"Combina as linhas retas e as diagonais.",Rook:"Linhas retas até encontrar uma peça.",Bishop:"Diagonais até encontrar uma peça.",Knight:"8 saltos em L, ignora peças no caminho.",Pawn:"Anda 1 ou 2 casas na primeira jogada, captura na diagonal, en passant e promoção."},application:{Main:"Loop do jogo: lê origem e destino, chama performChessMove e trata exceções e promoção.",UI:"Desenha o tabuleiro no console com cores ANSI, peças capturadas, turno e xeque."}};
+[["c1","boardgame"],["c2","chess"],["c3","application"]].forEach(([id,k])=>Object.keys(CL[k]).forEach(n=>{const b=document.createElement("button");b.className="chip";b.textContent=n;b.onclick=()=>{$$(".chip").forEach(c=>c.classList.remove("on"));b.classList.add("on");$("#info").innerHTML="<b>"+n+"</b>: "+CL[k][n]};$("#"+id).appendChild(b)}));
+/* tabuleiros */
+const START=["rnbqkbnr","pppppppp","        ","        ","        ","        ","PPPPPPPP","RNBQKBNR"].map(r=>r.split(""));
+const EMPTY=()=>Array.from({length:8},()=>Array(8).fill(" "));
+const NM={r:"Rook",n:"Knight",b:"Bishop",q:"Queen",k:"King",p:"Pawn"};
+function draw(el,b,hl,sel,pop){el.innerHTML="";for(let r=0;r<8;r++)for(let c=0;c<8;c++){const d=document.createElement("div"),p=b[r][c];d.className="sq "+((r+c)%2?"d":"l")+(hl&&hl[r][c]?" hl":"")+(sel&&sel[0]==r&&sel[1]==c?" sel":"")+(pop&&pop[0]==r&&pop[1]==c?" pop":"");if(p!==" "){d.textContent=p.toUpperCase();d.classList.add(p===p.toUpperCase()?"w":"y")}d.dataset.r=r;d.dataset.c=c;el.appendChild(d)}}
+function moves(b,r,c){const p=b[r][c],w=p===p.toUpperCase(),t=p.toLowerCase(),m=Array.from({length:8},()=>Array(8).fill(false));
+const ok=(i,j)=>i>=0&&i<8&&j>=0&&j<8,emp=(i,j)=>b[i][j]===" ",foe=(i,j)=>!emp(i,j)&&((b[i][j]===b[i][j].toUpperCase())!==w);
+const ray=(a,z)=>{let i=r+a,j=c+z;while(ok(i,j)&&emp(i,j)){m[i][j]=true;i+=a;j+=z}if(ok(i,j)&&foe(i,j))m[i][j]=true},step=(i,j)=>{if(ok(i,j)&&(emp(i,j)||foe(i,j)))m[i][j]=true};
+if("rq".includes(t))[[1,0],[-1,0],[0,1],[0,-1]].forEach(d=>ray(...d));
+if("bq".includes(t))[[1,1],[1,-1],[-1,1],[-1,-1]].forEach(d=>ray(...d));
+if(t=="n")[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]].forEach(d=>step(r+d[0],c+d[1]));
+if(t=="k")for(let i=-1;i<2;i++)for(let j=-1;j<2;j++)if(i||j)step(r+i,c+j);
+if(t=="p"){const f=w?-1:1;if(ok(r+f,c)&&emp(r+f,c)){m[r+f][c]=true;if(r==(w?6:1)&&emp(r+2*f,c))m[r+2*f][c]=true}[-1,1].forEach(d=>ok(r+f,c+d)&&foe(r+f,c+d)&&(m[r+f][c+d]=true))}
+return m}
+/* 02 initialSetup */
+let timer;const seq=[];[[7,6,"w"],[0,1,"b"]].forEach(([a,pr,s])=>{for(let c=0;c<8;c++)seq.push([a,c]);for(let c=0;c<8;c++)seq.push([pr,c])});
+function cw(){clearInterval(timer);draw($("#b2"),EMPTY());$("#log").textContent="// tabuleiro vazio: new Board(8, 8)"}
+$("#clr").onclick=cw;cw();
+$("#run").onclick=()=>{cw();let i=0;const B=EMPTY();$("#log").textContent="";timer=setInterval(()=>{if(i>=seq.length){clearInterval(timer);return}const[r,c]=seq[i++],p=START[r][c],w=p===p.toUpperCase();B[r][c]=p;draw($("#b2"),B,null,null,[r,c]);const l=$("#log");l.textContent+=`placeNewPiece('${"abcdefgh"[c]}', ${8-r}, new ${NM[p.toLowerCase()]}(board, Color.${w?"WHITE":"BLACK"}));\n`;l.scrollTop=1e5},90)};
+/* 03 simulador */
+let B,hl=null,sl=null;
+function rend(){draw($("#b3"),B,hl,sl);$("#mat").innerHTML=hl?"boolean[][] mat =\n"+hl.map(r=>r.map(v=>v?"<u>true </u>":"false").join(" ")).join("\n"):"boolean[][] mat = null // selecione uma peça"}
+function rst(){B=START.map(r=>[...r]);hl=sl=null;$("#sel").textContent="Nenhuma peça selecionada.";rend()}
+$("#rst").onclick=rst;rst();
+$("#b3").onclick=e=>{const d=e.target.closest(".sq");if(!d)return;const r=+d.dataset.r,c=+d.dataset.c;
+if(hl&&hl[r][c]){B[r][c]=B[sl[0]][sl[1]];B[sl[0]][sl[1]]=" ";hl=sl=null;$("#sel").textContent="Jogada executada: makeMove().";rend();return}
+if(B[r][c]===" "){hl=sl=null;$("#sel").textContent="There is no piece on source position";rend();return}
+sl=[r,c];hl=moves(B,r,c);const n=hl.flat().filter(Boolean).length;$("#sel").innerHTML=`<b>${NM[B[r][c].toLowerCase()]}</b> em ${"abcdefgh"[c]}${8-r} (linha ${r}, coluna ${c})<br>${n} movimento(s) possível(is)`;rend()};
+/* 04 fluxo */
+const ST=[["validateSourcePosition","Existe peça na origem? É do jogador da vez? Tem algum movimento possível? Se não, lança ChessException.","if (!board.thereIsAPiece(position))\n    throw new ChessException(\"There is no piece on source position\");"],
+["validateTargetPosition","O destino precisa estar marcado como true na matriz de possibleMoves() da peça.","if (!board.piece(source).possibleMove(target))\n    throw new ChessException(\"The chosen piece can't move to target position\");"],
+["makeMove","Remove a peça da origem, captura a do destino, coloca no destino e trata roque e en passant.","ChessPiece p = (ChessPiece) board.removePiece(source);\np.increaseMoveCount();\nPiece capturedPiece = board.removePiece(target);\nboard.placePiece(target, p);"],
+["testCheck + undoMove","Se o próprio rei ficou em xeque, a jogada é desfeita e a exceção é lançada.","if (testCheck(currentPlayer)) {\n    undoMove(source, target, capturedPiece);\n    throw new ChessException(\"You can't put yourself in check\");\n}"],
+["Promoção","Peão que chegou à última linha vira Rainha, que depois pode ser trocada por replacePromotedPiece().","promoted = replacePromotedPiece(\"Q\");"],
+["Xeque e xeque-mate","Testa o adversário. Em xeque, simula todas as jogadas possíveis dele; se nenhuma salva o rei, é mate.","check = testCheck(opponent(currentPlayer));\nif (testCheckMate(opponent(currentPlayer))) checkMate = true;\nelse nextTurn();"]];
+ST.forEach((s,i)=>{const b=document.createElement("button");b.textContent=i+1;b.onclick=()=>{$$("#st button").forEach(x=>x.classList.remove("on"));b.classList.add("on");$("#stt").textContent=s[0];$("#std").textContent=s[1];$("#stc").textContent=s[2]};$("#st").appendChild(b)});$("#st button").click();
+/* 05 especiais */
+const SP=[["Roque","O rei move 2 casas e a torre vai para o outro lado dele. Só vale se rei e torre nunca se moveram (moveCount == 0), se as casas entre eles estão vazias e se não há xeque.","if (p instanceof King && target.getColumn() == source.getColumn() + 2) {\n    Position sourceT = new Position(source.getRow(), source.getColumn() + 3);\n    Position targetT = new Position(source.getRow(), source.getColumn() + 1);\n    ChessPiece rook = (ChessPiece) board.removePiece(sourceT);\n    board.placePiece(targetT, rook);\n}"],
+["En passant","Depois de um peão avançar 2 casas, ele fica guardado em enPassantVulnerable por um turno. O peão adversário ao lado captura na diagonal vazia.","if (source.getColumn() != target.getColumn() && capturedPiece == null) {\n    pawnPosition = new Position(target.getRow() + 1, target.getColumn()); // branco\n    capturedPiece = board.removePiece(pawnPosition);\n}"],
+["Promoção","Ao chegar na última linha, o peão é removido e uma nova peça (B, N, R ou Q) é instanciada no lugar. O Main pergunta qual o jogador quer.","Piece p = board.removePiece(pos);\npieceOnTheBoard.remove(p);\nChessPiece newPiece = newPiece(type, promoted.getColor());\nboard.placePiece(pos, newPiece);"]];
+SP.forEach((s,i)=>{const b=document.createElement("button");b.textContent=s[0];b.onclick=()=>{$$("#tb button").forEach(x=>x.classList.remove("on"));b.classList.add("on");$("#tbd").textContent=s[1];$("#tbc").textContent=s[2]};$("#tb").appendChild(b)});$("#tb button").click();
+/* 06 POO */
+[["Herança","King, Queen, Rook, Bishop, Knight e Pawn estendem ChessPiece, que estende Piece."],["Abstração e polimorfismo","Piece declara possibleMoves(); cada peça implementa o seu. ChessMatch trata todas como Piece."],["Encapsulamento","Atributos privados, getters controlados e métodos protected, como toPosition() em ChessPosition."],["Exceções próprias","BoardException e ChessException deixam os erros claros e tratados no Main."],["Composição","ChessMatch tem um Board, listas de peças e passa this a King e Pawn para consultar o estado da partida."],["Enum","Color evita strings soltas e deixa o código seguro e legível."]].forEach(([t,d])=>{const x=document.createElement("div");x.className="card";x.innerHTML="<b>"+t+"</b><p>"+d+"</p>";$("#oop").appendChild(x)});
+</script>
+</body>
+</html>
